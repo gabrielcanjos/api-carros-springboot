@@ -71,16 +71,20 @@ public class CarrosController {
     @PutMapping("/{id}")
     public ResponseEntity put(@PathVariable Long id, @RequestBody Carro carro) {
         carro.setId(id);
-        CarroDTO c = service.update(carro, id);
 
-        return c != null ?
-                ResponseEntity.ok(c) :
-                ResponseEntity.notFound().build();
+        Optional<CarroDTO> c = service.update(carro, id);
+
+        return c.isPresent()
+                ? ResponseEntity.ok(c.get())
+                : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") Long id) {
-        service.delete(id);
-        return "Carro deletado com sucesso! " + id;
+    public ResponseEntity delete(@PathVariable Long id) {
+        boolean ok = service.delete(id);
+
+        return ok
+                ? ResponseEntity.ok().build()          // 200
+                : ResponseEntity.notFound().build();   // 404
     }
 }

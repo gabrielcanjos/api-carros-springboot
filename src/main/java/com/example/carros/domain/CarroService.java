@@ -57,17 +57,14 @@ public class CarroService {
     }
 
     public CarroDTO insert(Carro carro) {
-    Assert.isNull(carro.getId(), "Não foi possível inserir o registro.");
+        Assert.isNull(carro.getId(), "Não foi possível inserir o registro.");
         return CarroDTO.create(rep.save(carro));
     }
 
-    public CarroDTO update(Carro carro, Long id) {
+    public Optional<CarroDTO> update(Carro carro, Long id) {
         Assert.notNull(id, "Não foi possível atualizar o registro.");
 
-        Optional<Carro> optional = rep.findById(id);
-
-        if (optional.isPresent()) {
-            Carro db = optional.get();
+        return rep.findById(id).map(db -> {
 
             if (carro.getNome() != null) {
                 db.setNome(carro.getNome());
@@ -76,16 +73,16 @@ public class CarroService {
             if (carro.getTipo() != null) {
                 db.setTipo(carro.getTipo());
             }
-
+            //throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Carro não encontrado");
             return CarroDTO.create(rep.save(db));
-        } else {
-            throw new RuntimeException("Não foi possível atualizar o registro.");
-        }
+        });
     }
 
-    public void delete(Long id) {
-        if ( getCarroById(id).isPresent()) {
+    public boolean delete(Long id) {
+        if (rep.existsById(id)) {
             rep.deleteById(id);
+            return true;
         }
+        return false;
     }
 }
